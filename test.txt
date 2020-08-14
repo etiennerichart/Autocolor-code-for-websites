@@ -1,6 +1,7 @@
-        ''hello#''
+        ''hello#'' d
         'yoer 'sdd
         ''' fefrfer
         erere'''erer
         'ededededede'
-        '''eded'''
+        '''eded''' d
+        '' def mytest(sj, dhj, dj -> int) -> int:

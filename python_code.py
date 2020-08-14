@@ -17,16 +17,34 @@ class PythonCode(object):
         #type of str ' or "
         str_type = ''
         for line in self.file:
+            def_ignore = False
+            args = False
+            args_done = False
+            parens = 0
             pos = 0
+            word = ''
             for char in line:
-                if not string_ignore and not multiline_string_ignore:
+                if not string_ignore and not multiline_string_ignore and not def_ignore:
                     #begin ignoring text while trying to finish the string
                     if char == '\'' or char == '\"': 
                         str_start = pos
                         str_type = char
                         apostrophe_len = 1
                         string_ignore = True
+                        if word:
+                            self.output += word
+                            word = ''
+                        self.output += char
+                    elif char != ' ' and char != '\n':
+                        word += char
+                        if word == 'def':
+                            word = ''
+                            self.output += self.add_color(line, 'blue', pos - 2, pos + 1)
+                            def_ignore = True
                     else:
+                        if word:
+                            self.output += word
+                            word = ''
                         self.output += char
                 #if we are looking for the end of a string
                 elif string_ignore:
@@ -82,6 +100,55 @@ class PythonCode(object):
                     #' unclosed string so reset apostrophe_end to 0
                     else:
                         apostrophe_end = 0
+                elif def_ignore:
+                    if char == '(' and not args:
+                        print(6)
+                        self.output += self.add_color(line, 'yellow', pos - len(word), pos - 1)
+                        self.output += char
+                        word = ''
+                        parens = 1
+                    elif char == ',':
+                        if '->' not in word:
+                            print(7)
+                            self.output += self.add_color(line, 'lightblue', pos - len(word), pos)
+                            self.output += ','
+                            word = ''
+                        else:
+                            start = word.index('->') + 2
+                            print(8)
+                            self.output +=  word[:start] + self.add_color(word, 'lightblue',  start, len(word))
+                            self.output += ','
+                            word = ''
+                    elif char == '(':
+                        parens += 1
+                    elif char == ')':
+                        parens -= 1
+                        if parens == 0:
+                            if '->' not in word:
+                                print(9)
+                                self.output += self.add_color(line, 'lightblue', pos - len(word), pos - 1)
+                                self.output += ')'
+                                word = ''
+                            else:
+                                start = word.index('->') + 2
+                                print(10)
+                                self.output += word[:start] + self.add_color(word, 'lightblue',  start, len(word) - 1)
+                                self.output += ')'
+                                word = ''
+                        args_done = True
+                    elif char == ':':
+                        if '->' not in word:
+                            self.output += word + char
+                            word = ''
+                        else:
+                            start = word.index('->') + 2
+                            print(11)
+                            self.output += word[:start] + self.add_color(word, 'lightblue',  start, len(word))
+                            self.output += char
+                            word = ''
+                        def_ignore = False
+                    else:
+                        word += char
                 pos += 1
             #end of line if multistring is open
             if multiline_string_ignore:
