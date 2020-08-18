@@ -3,5 +3,10 @@
         ''' fefrfer
         erere'''erer
         'ededededede'
-        '''eded''' d
-        '' def mytest(sj, dhj, dj -> int) -> int:
+        e'e'#jkjkjk
+        and or not
+        '''eded''' k
+        2323 + '212' = w2
+        '' def mytest(sj, dhj, dj =  xs() -> int) -> int:
+        len(2, 545, 4) print(d, '3')
+        class de(object):
