@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #purple {
+            color: rgb(152, 5, 152);
+        }
+
+        #orange {
+            color: rgb(232, 91, 3);
+        }
+
+        #blue {
+            color: rgb(24, 79, 138);
+        }
+
+        #lightblue{
+            color: rgb(64, 143, 227)
+        }
+
+        #green {
+            color: rgb(24, 128, 24);
+        }
+
+        #lightgreen, #number {
+            color: rgb(37, 211, 171);
+        }
+
+        #yellow {
+            color: rgb(203, 182, 66);
+        }
+    </style>
+</head>
+<body>
+    <pre><code><span id="purple">import</span> re
+
+        <span id="blue">class</span> <span id="lightgreen">PythonCode</span>(<span id="lightgreen">objec</span>):
+            <span id="blue">def</span> <span id="yellow">__init__</span>(<span id="lightblue">self</span>,<span id="lightblue"> file</span>):
+                <span id="blue">self</span>.file = file
+                <span id="blue">self</span>.blue_words = {
+                    <span id="orange">'and'</span>,
+                    <span id="orange">'in'</span>,
+                    <span id="orange">'not'</span>,
+                    <span id="orange">'or'</span>,
+                    <span id="orange">'False'</span>,
+                    <span id="orange">'True'</span>,
+                    <span id="orange">'__name__'</span>,
+                }
+                <span id="blue">self</span>.purple_words = {
+                    <span id="orange">'if'</span>,
+                    <span id="orange">'else'</span>,
+                    <span id="orange">'elif'</span>,
+                    <span id="orange">'import'</span>,
+                    <span id="orange">'from'</span>,
+                    <span id="orange">'as'</span>,
+                    <span id="orange">'return'</span>,
+                }
+                <span id="blue">self</span>.output = <span id="orange">''</span>
+                self.color_file()
+                <span id="yellow">print</span>(self.output)
+                
+            <span id="blue">def</span> <span id="yellow">color_file</span>(<span id="lightblue">self</span>):
+                <span id="green">#if there is a string to ignore the coloring inside it</span>
+                string_ignore = <span id="blue">False</span>
+                <span id="green">#if there is a multiline string ignore everything in it</span>
+                multiline_string_ignore = <span id="blue">False</span>
+                <span id="green">#if the multiline is on the same line</span>
+                same_line = <span id="blue">True</span>
+                <span id="green">#type of str ' or "</span>
+                str_type = <span id="orange">''</span>
+                for line <span id="blue">in</span> <span id="blue">self</span>.file:
+                    def_ignore = <span id="blue">False</span>
+                    args = <span id="blue">False</span>
+                    args_done = <span id="blue">False</span>
+                    class_ignore = <span id="blue">False</span>
+                    equals = <span id="blue">False</span>
+                    skip_next = <span id="blue">False</span>
+                    parens = <span id="number">0</span>
+                    pos = <span id="number">0</span>
+                    word = <span id="orange">''</span>
+                    for char <span id="blue">in</span> line:
+                        <span id="purple">if</span> <span id="blue">not</span> string_ignore <span id="blue">and</span> <span id="blue">not</span> multiline_string_ignore <span id="blue">and</span> <span id="blue">not</span> def_ignore <span id="blue">and</span> <span id="blue">not</span> class_ignore:
+                            <span id="green">#begin ignoring text while trying to finish the string</span>
+                            <span id="purple">if</span> char == <span id="orange">'\''</span> <span id="blue">or</span> char == <span id="orange">'\"'</span>: 
+                                str_start = pos
+                                str_type = char
+                                apostrophe_len = <span id="number">1</span>
+                                string_ignore = <span id="blue">True</span>
+                                <span id="purple">if</span> word:
+                                    <span id="blue">self</span>.output += word
+                                    word = <span id="orange">''</span>
+                            <span id="purple">elif</span> char == <span id="orange">'#'</span>:
+                                <span id="purple">if</span> word:
+                                    <span id="blue">self</span>.output += word
+                                    word = <span id="orange">''</span>
+                                <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'green'</span>, pos, <span id="yellow">len</span>(line) - <span id="number">1</span>)
+                                <span id="blue">self</span>.output += <span id="orange">'\n'</span>
+                                break
+                            <span id="purple">elif</span> (char == <span id="orange">','</span> <span id="blue">or</span> char == <span id="orange">')'</span>) <span id="blue">and</span> equals:
+                                <span id="purple">if</span> char == <span id="orange">')'</span>:
+                                    parens -= <span id="number">1</span>
+                                <span id="purple">if</span> parens == 0:
+                                    def_ignore = <span id="blue">True</span>
+                                    equals = <span id="blue">False</span>
+                                    <span id="purple">if</span> <span id="orange">'->'</span> <span id="blue">not</span> <span id="blue">in</span> word:
+                                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightblue'</span>, pos - <span id="yellow">len</span>(word), pos)
+                                        <span id="blue">self</span>.output += char
+                                        word = <span id="orange">''</span>
+                                    else:
+                                        start = word.index(<span id="orange">'->'</span>) + <span id="number">2</span>
+                                        <span id="blue">self</span>.output +=  word[:start] + self.add_color(word, <span id="orange">'lightgreen'</span>,  start, <span id="yellow">len</span>(word))
+                                        <span id="blue">self</span>.output += char
+                                        word = <span id="orange">''</span>
+                                else:
+                                    <span id="blue">self</span>.output += word + char
+                            <span id="purple">elif</span> char == <span id="orange">','</span> <span id="blue">or</span> char == <span id="orange">')'</span>:
+                                <span id="purple">if</span> char == <span id="orange">')'</span>:
+                                    parens -= <span id="number">1</span>
+                                <span id="purple">if</span> word.isnumeric():
+                                    <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'number'</span>, <span id="number">0</span>, <span id="yellow">len</span>(word))
+                                else:
+                                    <span id="blue">self</span>.output += word
+                                <span id="blue">self</span>.output += char
+                                word = <span id="orange">''</span>
+                            <span id="purple">elif</span> char == <span id="orange">'('</span>:
+                                parens += <span id="number">1</span>
+                                <span id="purple">if</span> word.startswith(<span id="orange">'print'</span>) <span id="blue">or</span> word.startswith(<span id="orange">'len'</span>) <span id="blue">or</span> word.startswith(<span id="orange">'open'</span>):
+                                    <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'yellow'</span>, <span id="number">0</span> , <span id="yellow">len</span>(word))
+                                else:
+                                    <span id="blue">self</span>.output += word
+                                <span id="blue">self</span>.output += char
+                                word = <span id="orange">''</span>
+                            <span id="purple">elif</span> char != <span id="orange">' '</span> <span id="blue">and</span> char != <span id="orange">'\n'</span>:
+                                word += char
+                            else:
+                                <span id="purple">if</span> word == <span id="orange">'def'</span>:
+                                    word = <span id="orange">''</span>
+                                    <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'blue'</span>, pos - <span id="number">3</span>, pos)
+                                    def_ignore = <span id="blue">True</span>
+                                <span id="purple">elif</span> word == <span id="orange">'class'</span>:
+                                    word = <span id="orange">''</span>
+                                    <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'blue'</span>, pos - <span id="number">5</span>, pos)
+                                    class_ignore = <span id="blue">True</span>
+                                <span id="purple">elif</span> word.startswith(<span id="orange">'self'</span>):
+                                    <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'blue'</span>, <span id="number">0</span>, <span id="number">4</span>) + word[4:]
+                                    word = <span id="orange">''</span>
+                                <span id="purple">elif</span> word == <span id="orange">'->'</span> <span id="blue">and</span> equals:
+                                    word += char
+                                    continue
+                                <span id="purple">elif</span> word <span id="blue">in</span> <span id="blue">self</span>.blue_words:
+                                    <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'blue'</span>, <span id="number">0</span>, <span id="yellow">len</span>(word))
+                                    word = <span id="orange">''</span>
+                                <span id="purple">elif</span> word <span id="blue">in</span> <span id="blue">self</span>.purple_words:
+                                    <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'purple'</span>, <span id="number">0</span>, <span id="yellow">len</span>(word))
+                                    word = <span id="orange">''</span>
+                                <span id="purple">elif</span> word:
+                                    <span id="purple">if</span> word.isnumeric():
+                                        <span id="blue">self</span>.output += self.add_color(word, <span id="orange">'number'</span>, <span id="number">0</span>, <span id="yellow">len</span>(word))
+                                    else:
+                                        <span id="blue">self</span>.output += word
+                                    word = <span id="orange">''</span>
+                                
+                                <span id="blue">self</span>.output += char
+                        <span id="green">#if we are looking for the end of a string</span>
+                        <span id="purple">elif</span> string_ignore:
+                            <span id="purple">if</span> skip_next:
+                                skip_next = <span id="blue">False</span>
+                            <span id="purple">elif</span> char == <span id="orange">'\\'</span>:
+                                apostrophe_end = <span id="number">0</span>
+                                skip_next = <span id="blue">True</span>
+                            <span id="green">#do we encounter the the same string type ' or "</span>
+                            <span id="purple">elif</span> char == str_type:
+                                <span id="green"># if ''</span>
+                                <span id="purple">if</span>  pos == (str_start + <span id="number">1</span>):
+                                    apostrophe_len += <span id="number">1</span>
+                                <span id="green"># if ''' multistring </span>
+                                <span id="purple">elif</span> pos == (str_start + <span id="number">2</span>):
+                                    <span id="purple">if</span> apostrophe_len == 2:
+                                        apostrophe_len = <span id="number">3</span>
+                                        string_ignore = <span id="blue">False</span>
+                                        multiline_string_ignore = <span id="blue">True</span>
+                                        apostrophe_end = <span id="number">0</span>
+                                    <span id="green"># 'a'</span>
+                                    else:
+                                        string_ignore = <span id="blue">False</span>
+                                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'orange'</span>, str_start, pos + <span id="number">1</span>)
+                                <span id="green">#'dshd sldsd '</span>
+                                else:
+                                    apostrophe_end += <span id="number">1</span>
+                                    <span id="purple">if</span> apostrophe_end == apostrophe_len:
+                                        string_ignore = <span id="blue">False</span>
+                                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'orange'</span>, str_start, (pos + <span id="number">1</span>))
+                            <span id="green">#'' empty string</span>
+                            <span id="purple">elif</span> pos >= (str_start + <span id="number">2</span>) <span id="blue">and</span> apostrophe_len == 2:
+                                string_ignore = <span id="blue">False</span>
+                                <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'orange'</span>, str_start, pos)
+                                <span id="blue">self</span>.output += char
+                            <span id="green">#' unclosed string so reset apostrophe_end to 0</span>
+                            else:
+                                apostrophe_end = <span id="number">0</span>
+                        <span id="green">#multiline</span>
+                        <span id="purple">elif</span> multiline_string_ignore:
+                            <span id="purple">if</span> skip_next:
+                                skip_next = <span id="blue">False</span>
+                            <span id="purple">elif</span> char == <span id="orange">'\\'</span>:
+                                apostrophe_end = <span id="number">0</span>
+                                skip_next = <span id="blue">True</span>
+                            <span id="green">#''' fgf ' add 1 to the apostrophe_end</span>
+                            <span id="purple">elif</span> char == str_type:
+                                apostrophe_end += <span id="number">1</span>
+                                <span id="green">#'''sefrf'''</span>
+                                <span id="purple">if</span> apostrophe_end == 3:
+                                    multiline_string_ignore = <span id="blue">False</span>
+                                    <span id="green">#''' frrer '''</span>
+                                    <span id="purple">if</span> same_line:
+                                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'orange'</span>, str_start, pos + <span id="number">1</span>)
+                                    <span id="green">#'''derrere \n dere '''</span>
+                                    else:
+                                        <span id="blue">self</span>.output += self.multiline_add_color_end(line, <span id="orange">'orange'</span>, pos + <span id="number">1</span>)
+                                        same_line = <span id="blue">True</span>
+                            <span id="green">#' unclosed string so reset apostrophe_end to 0</span>
+                            else:
+                                apostrophe_end = <span id="number">0</span>
+                        <span id="purple">elif</span> def_ignore:
+                            <span id="purple">if</span> char == <span id="orange">'('</span> <span id="blue">and</span> <span id="blue">not</span> args:
+                                <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'yellow'</span>, pos - <span id="yellow">len</span>(word), pos)
+                                <span id="blue">self</span>.output += char
+                                word = <span id="orange">''</span>
+                                parens = <span id="number">1</span>
+                            <span id="purple">elif</span> char == <span id="orange">'='</span>:
+                                <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightblue'</span>, pos - <span id="yellow">len</span>(word), pos - <span id="number">1</span>)
+                                <span id="blue">self</span>.output += <span id="orange">' ='</span>
+                                word = <span id="orange">''</span>
+                                equals = <span id="blue">True</span>
+                                def_ignore = <span id="blue">False</span>
+                            <span id="purple">elif</span> char == <span id="orange">','</span>:
+                                <span id="purple">if</span> <span id="orange">'->'</span> <span id="blue">not</span> <span id="blue">in</span> word:
+                                    <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightblue'</span>, pos - <span id="yellow">len</span>(word), pos)
+                                    <span id="blue">self</span>.output += <span id="orange">','</span>
+                                    word = <span id="orange">''</span>
+                                else:
+                                    start = word.index(<span id="orange">'->'</span>) + <span id="number">2</span>
+                                    <span id="blue">self</span>.output +=  word[:start] + self.add_color(word, <span id="orange">'lightgreen'</span>,  start, <span id="yellow">len</span>(word))
+                                    <span id="blue">self</span>.output += <span id="orange">','</span>
+                                    word = <span id="orange">''</span>
+                            <span id="purple">elif</span> char == <span id="orange">'('</span>:
+                                parens += <span id="number">1</span>
+                            <span id="purple">elif</span> char == <span id="orange">')'</span>:
+                                parens -= <span id="number">1</span>
+                                <span id="purple">if</span> parens == 0:
+                                    <span id="purple">if</span> <span id="orange">'->'</span> <span id="blue">not</span> <span id="blue">in</span> word:
+                                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightblue'</span>, pos - <span id="yellow">len</span>(word), pos)
+                                        <span id="blue">self</span>.output += <span id="orange">')'</span>
+                                        word = <span id="orange">''</span>
+                                    else:
+                                        start = word.index(<span id="orange">'->'</span>) + <span id="number">2</span>
+                                        <span id="blue">self</span>.output += word[:start] + self.add_color(word, <span id="orange">'lightgreen'</span>,  start, <span id="yellow">len</span>(word) - <span id="number">1</span>)
+                                        <span id="blue">self</span>.output += <span id="orange">')'</span>
+                                        word = <span id="orange">''</span>
+                                args_done = <span id="blue">True</span>
+                            <span id="purple">elif</span> char == <span id="orange">':'</span>:
+                                <span id="purple">if</span> <span id="orange">'->'</span> <span id="blue">not</span> <span id="blue">in</span> word:
+                                    <span id="blue">self</span>.output += word + char
+                                    word = <span id="orange">''</span>
+                                else:
+                                    start = word.index(<span id="orange">'->'</span>) + <span id="number">2</span>
+                                    <span id="blue">self</span>.output += word[:start] + self.add_color(word, <span id="orange">'lightgreen'</span>,  start, <span id="yellow">len</span>(word))
+                                    <span id="blue">self</span>.output += char
+                                    word = <span id="orange">''</span>
+                                def_ignore = <span id="blue">False</span>
+                            else:
+                                word += char
+                        <span id="purple">elif</span> class_ignore:
+                            <span id="purple">if</span> char == <span id="orange">'('</span> <span id="blue">and</span> <span id="blue">not</span> args:
+                                <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightgreen'</span>, pos - <span id="yellow">len</span>(word), pos)
+                                <span id="blue">self</span>.output += char
+                                word = <span id="orange">''</span>
+                                parens = <span id="number">1</span>
+                                args = <span id="blue">True</span>
+                            <span id="purple">elif</span> char == <span id="orange">'('</span>:
+                                parens += <span id="number">1</span>
+                            <span id="purple">elif</span> char == <span id="orange">')'</span>:
+                                parens -= <span id="number">1</span>
+                                <span id="purple">if</span> parens == 0:
+                                    <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'lightgreen'</span>, pos - <span id="yellow">len</span>(word), pos - <span id="number">1</span>)
+                                    <span id="blue">self</span>.output += <span id="orange">')'</span>
+                                    word = <span id="orange">''</span>
+                                args_done = <span id="blue">True</span>
+                            <span id="purple">elif</span> char == <span id="orange">':'</span>:
+                                <span id="purple">if</span> <span id="orange">'->'</span> <span id="blue">not</span> <span id="blue">in</span> word:
+                                    <span id="blue">self</span>.output += word + char
+                                    word = <span id="orange">''</span>
+                                else:
+                                    start = word.index(<span id="orange">'->'</span>) + <span id="number">2</span>
+                                    <span id="blue">self</span>.output += word[:start] + self.add_color(word, <span id="orange">'lightgreen'</span>,  start, <span id="yellow">len</span>(word))
+                                    <span id="blue">self</span>.output += char
+                                    word = <span id="orange">''</span>
+                                def_ignore = <span id="blue">False</span>
+                            else:
+                                word += char
+                        pos += <span id="number">1</span>
+                    
+                    <span id="green">#end of line if multistring is open</span>
+                    <span id="purple">if</span> multiline_string_ignore:
+                        same_line = <span id="blue">False</span>
+                        apostrophe_end = <span id="number">0</span>
+                        <span id="blue">self</span>.output += self.multiline_add_color_start(line, <span id="orange">'orange'</span>, str_start)
+                    <span id="green">#end of line string is open close it</span>
+                    <span id="purple">elif</span> string_ignore:
+                        <span id="blue">self</span>.output += self.add_color(line, <span id="orange">'orange'</span>, str_start, pos)
+                    else:
+                        <span id="blue">self</span>.output += word
+                        def_ignore = <span id="blue">False</span>
+        
+            <span id="blue">def</span> <span id="yellow">add_color</span>(<span id="lightblue">self</span>,<span id="lightblue"> line</span>,<span id="lightblue"> color</span>,<span id="lightblue"> start</span>,<span id="lightblue"> end</span>):
+                line = <span id="orange">'<span id="'</span> + color + <span id="orange">'">'</span> + line[start:end] + <span id="orange">'</span>'</span>
+                <span id="purple">return</span>  line
+        
+            <span id="blue">def</span> <span id="yellow">multiline_add_color_start</span>(<span id="lightblue">self</span>,<span id="lightblue"> line</span>,<span id="lightblue"> color</span>,<span id="lightblue"> start</span>):
+                line = <span id="orange">'<span id="'</span> + color + <span id="orange">'">'</span> + line[start:]
+                <span id="purple">return</span> line
+        
+            <span id="blue">def</span> <span id="yellow">multiline_add_color_end</span>(<span id="lightblue">self</span>,<span id="lightblue"> line</span>,<span id="lightblue"> color</span>,<span id="lightblue"> end</span>):
+                line = line[:end] + <span id="orange">'</span>'</span>
+                <span id="purple">return</span> line
+        
+        
+        <span id="purple">if</span> <span id="blue">__name__</span> == <span id="orange">"__main__"</span>:
+            python = PythonCode(<span id="yellow">open</span>(<span id="orange">'python_code.py'</span>, <span id="orange">'r'</span>))
+    </code></pre>
+</body>
+</html>

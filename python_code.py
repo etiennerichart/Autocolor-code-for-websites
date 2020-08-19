@@ -10,7 +10,7 @@ class PythonCode(object):
             'or',
             'False',
             'True',
-            '__name__'
+            '__name__',
         }
         self.purple_words = {
             'if',
@@ -18,7 +18,8 @@ class PythonCode(object):
             'elif',
             'import',
             'from',
-            'as'
+            'as',
+            'return',
         }
         self.output = ''
         self.color_file()
@@ -39,6 +40,7 @@ class PythonCode(object):
             args_done = False
             class_ignore = False
             equals = False
+            skip_next = False
             parens = 0
             pos = 0
             word = ''
@@ -64,17 +66,14 @@ class PythonCode(object):
                         if char == ')':
                             parens -= 1
                         if parens == 0:
-                            print("parens", word + char)
                             def_ignore = True
                             equals = False
                             if '->' not in word:
-                                print(7.2, word)
                                 self.output += self.add_color(line, 'lightblue', pos - len(word), pos)
                                 self.output += char
                                 word = ''
                             else:
                                 start = word.index('->') + 2
-                                print(8.2)
                                 self.output +=  word[:start] + self.add_color(word, 'lightgreen',  start, len(word))
                                 self.output += char
                                 word = ''
@@ -91,7 +90,6 @@ class PythonCode(object):
                         word = ''
                     elif char == '(':
                         parens += 1
-                        print(30)
                         if word.startswith('print') or word.startswith('len') or word.startswith('open'):
                             self.output += self.add_color(word, 'yellow', 0 , len(word))
                         else:
@@ -103,13 +101,15 @@ class PythonCode(object):
                     else:
                         if word == 'def':
                             word = ''
-                            print(14)
                             self.output += self.add_color(line, 'blue', pos - 3, pos)
                             def_ignore = True
                         elif word == 'class':
                             word = ''
                             self.output += self.add_color(line, 'blue', pos - 5, pos)
                             class_ignore = True
+                        elif word.startswith('self'):
+                            self.output += self.add_color(word, 'blue', 0, 4) + word[4:]
+                            word = ''
                         elif word == '->' and equals:
                             word += char
                             continue
@@ -129,8 +129,13 @@ class PythonCode(object):
                         self.output += char
                 #if we are looking for the end of a string
                 elif string_ignore:
+                    if skip_next:
+                        skip_next = False
+                    elif char == '\\':
+                        apostrophe_end = 0
+                        skip_next = True
                     #do we encounter the the same string type ' or "
-                    if char == str_type:
+                    elif char == str_type:
                         # if ''
                         if  pos == (str_start + 1):
                             apostrophe_len += 1
@@ -144,19 +149,16 @@ class PythonCode(object):
                             # 'a'
                             else:
                                 string_ignore = False
-                                print(1)
                                 self.output += self.add_color(line, 'orange', str_start, pos + 1)
                         #'dshd sldsd '
                         else:
                             apostrophe_end += 1
                             if apostrophe_end == apostrophe_len:
                                 string_ignore = False
-                                print(2)
                                 self.output += self.add_color(line, 'orange', str_start, (pos + 1))
                     #'' empty string
                     elif pos >= (str_start + 2) and apostrophe_len == 2:
                         string_ignore = False
-                        print(3)
                         self.output += self.add_color(line, 'orange', str_start, pos)
                         self.output += char
                     #' unclosed string so reset apostrophe_end to 0
@@ -164,19 +166,22 @@ class PythonCode(object):
                         apostrophe_end = 0
                 #multiline
                 elif multiline_string_ignore:
+                    if skip_next:
+                        skip_next = False
+                    elif char == '\\':
+                        apostrophe_end = 0
+                        skip_next = True
                     #''' fgf ' add 1 to the apostrophe_end
-                    if char == str_type:
+                    elif char == str_type:
                         apostrophe_end += 1
                         #'''sefrf'''
                         if apostrophe_end == 3:
                             multiline_string_ignore = False
                             #''' frrer '''
                             if same_line:
-                                print(4)
                                 self.output += self.add_color(line, 'orange', str_start, pos + 1)
                             #'''derrere \n dere '''
                             else:
-                                print(5)
                                 self.output += self.multiline_add_color_end(line, 'orange', pos + 1)
                                 same_line = True
                     #' unclosed string so reset apostrophe_end to 0
@@ -184,7 +189,6 @@ class PythonCode(object):
                         apostrophe_end = 0
                 elif def_ignore:
                     if char == '(' and not args:
-                        print(6)
                         self.output += self.add_color(line, 'yellow', pos - len(word), pos)
                         self.output += char
                         word = ''
@@ -197,13 +201,11 @@ class PythonCode(object):
                         def_ignore = False
                     elif char == ',':
                         if '->' not in word:
-                            print(7)
                             self.output += self.add_color(line, 'lightblue', pos - len(word), pos)
                             self.output += ','
                             word = ''
                         else:
                             start = word.index('->') + 2
-                            print(8)
                             self.output +=  word[:start] + self.add_color(word, 'lightgreen',  start, len(word))
                             self.output += ','
                             word = ''
@@ -213,13 +215,11 @@ class PythonCode(object):
                         parens -= 1
                         if parens == 0:
                             if '->' not in word:
-                                print(9)
-                                self.output += self.add_color(line, 'lightblue', pos - len(word), pos - 1)
+                                self.output += self.add_color(line, 'lightblue', pos - len(word), pos)
                                 self.output += ')'
                                 word = ''
                             else:
                                 start = word.index('->') + 2
-                                print(10)
                                 self.output += word[:start] + self.add_color(word, 'lightgreen',  start, len(word) - 1)
                                 self.output += ')'
                                 word = ''
@@ -230,7 +230,6 @@ class PythonCode(object):
                             word = ''
                         else:
                             start = word.index('->') + 2
-                            print(11)
                             self.output += word[:start] + self.add_color(word, 'lightgreen',  start, len(word))
                             self.output += char
                             word = ''
@@ -239,7 +238,6 @@ class PythonCode(object):
                         word += char
                 elif class_ignore:
                     if char == '(' and not args:
-                        print(12)
                         self.output += self.add_color(line, 'lightgreen', pos - len(word), pos)
                         self.output += char
                         word = ''
@@ -250,7 +248,6 @@ class PythonCode(object):
                     elif char == ')':
                         parens -= 1
                         if parens == 0:
-                            print(13)
                             self.output += self.add_color(line, 'lightgreen', pos - len(word), pos - 1)
                             self.output += ')'
                             word = ''
@@ -261,7 +258,6 @@ class PythonCode(object):
                             word = ''
                         else:
                             start = word.index('->') + 2
-                            print(11)
                             self.output += word[:start] + self.add_color(word, 'lightgreen',  start, len(word))
                             self.output += char
                             word = ''
@@ -274,11 +270,9 @@ class PythonCode(object):
             if multiline_string_ignore:
                 same_line = False
                 apostrophe_end = 0
-                print(6)
                 self.output += self.multiline_add_color_start(line, 'orange', str_start)
             #end of line string is open close it
             elif string_ignore:
-                print(7)
                 self.output += self.add_color(line, 'orange', str_start, pos)
             else:
                 self.output += word
@@ -298,4 +292,4 @@ class PythonCode(object):
 
 
 if __name__ == "__main__":
-    python = PythonCode(open('test.txt', 'r'))
+    python = PythonCode(open('python_code.py', 'r'))

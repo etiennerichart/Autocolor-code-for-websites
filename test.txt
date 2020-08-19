@@ -1,12 +1,11 @@
-        ''hello#'' d
-        'yoer 'sdd
-        ''' fefrfer
-        erere'''erer
-        'ededededede'
-        e'e'#jkjkjk
-        and or not
-        '''eded''' k
-        2323 + '212' = w2
-        '' def mytest(sj, dhj, dj =  xs() -> int) -> int:
-        len(2, 545, 4) print(d, '3')
-        class de(object):
+def add_color(self, line, color, start, end):
+        line = '<span id="' + color + '">' + line[start:end] + '</span>'
+        return  line
+
+def multiline_add_color_start(self, line, color, start):
+        line = '<span id="' + color + '">' + line[start:]
+        return line
+
+def multiline_add_color_end(self, line, color, end):
+        line = line[:end] + '</span>'
+        return line
