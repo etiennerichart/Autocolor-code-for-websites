@@ -279,17 +279,23 @@ class PythonCode(object):
                 def_ignore = False
 
     def add_color(self, line, color, start, end):
-        line = '<span id="' + color + '">' + line[start:end] + '</span>'
+        line = '<span id="' + color + '">' + escape(line[start:end]) + '</span>'
         return  line
 
     def multiline_add_color_start(self, line, color, start):
-        line = '<span id="' + color + '">' + line[start:]
+        line = '<span id="' + color + '">' + escape(line[start:])
         return line
 
     def multiline_add_color_end(self, line, color, end):
-        line = line[:end] + '</span>'
+        line = escape(line[:end]) + '</span>'
         return line
+
+def escape(s):
+    return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
 
 
 if __name__ == "__main__":
     python = PythonCode(open('python_code.py', 'r'))
+    template = open('index.html').read()
+    open('temp.html', 'w').write(template.replace('PUTCODEHERE', python.output))
