@@ -159,6 +159,7 @@ class PythonCode(object):
                         string_ignore = True
                         if word == 'u':
                             self.output += self.add_color(word, "blue", 0, 1)
+                            word = ''
                         elif word:
                             output_word(word)
                             word = ''
