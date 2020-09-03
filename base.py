@@ -22,8 +22,18 @@ parser.add_argument('file',
                     type=argparse.FileType('r'),
                     nargs=argparse.REMAINDER,
                     help='the files you wish to ')
-args = parser.parse_args(['python', './python_code.py', 'base.py'])
+parser.add_argument('debug',
+                    type=bool,
+                    help="A dearker background with white font to better see the colors")
+args = parser.parse_args(['python', './python_code.py', 'base.py', 'True'])
 
 if args.language == 'python':
+    x = 0
     for file in args.file:
-       PythonCode(file)
+        x += 1
+        python = PythonCode(file, args.debug)
+        if python.debug:
+            template = open('indexdebug.html').read()
+        else:
+            template = open('index.html').read()
+        open("PythonCodeForHTML{0:03d}.html".format(x), 'w').write(template.replace('PUTCODEHERE', python.output))

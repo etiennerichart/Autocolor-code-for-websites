@@ -1,8 +1,7 @@
-import re
-
 class PythonCode(object):
-    def __init__(self, file):
+    def __init__(self, file, debug=False):
         self.file = file
+        self.debug = debug
         self.blue_words = {
             'and',
             'in',
@@ -161,7 +160,7 @@ class PythonCode(object):
                             self.output += self.add_color(word, "blue", 0, 1)
                             word = ''
                         elif word:
-                            output_word(word)
+                            self.output_word(word)
                             word = ''
                     elif char == '#':
                         if word:
@@ -390,6 +389,9 @@ def escape(s):
 
 
 if __name__ == "__main__":
-    python = PythonCode(open('../MVT/simple.py', 'r'))
-    template = open('index.html').read()
+    python = PythonCode(open('../MVT/simple.py', 'r'), True)
+    if python.debug:
+        template = open('indexdebug.html').read()
+    else:
+        template = open('index.html').read()
     open('temp.html', 'w').write(template.replace('PUTCODEHERE', python.output))
