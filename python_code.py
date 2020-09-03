@@ -11,6 +11,7 @@ class PythonCode(object):
             'False',
             'True',
             '__name__',
+            'self',
         }
         self.purple_words = {
             'if',
@@ -21,10 +22,111 @@ class PythonCode(object):
             'as',
             'return',
             'for',
-            'in'
+            'in',
+            'try',
+            'except',
+            'while',
+            'yield',
+            'break'
+        }
+        #most built in functions
+        self.yellow_words = {
+            'abs',
+            'delattr',
+            'hash',
+            'memoryview',
+            'all',
+            'help',
+            'min',
+            'setattr',
+            'any',
+            'dir',
+            'hex',
+            'next',
+            'ascii',
+            'divmod',
+            'id',
+            'sorted',
+            'bin',
+            'enumerate',
+            'input',
+            'oct',
+            'eval',
+            'open',
+            'breakpoint',
+            'exec',
+            'isinstance',
+            'ord',
+            'sum',
+            'filter',
+            'issubclass',
+            'pow',
+            'iter',
+            'print',
+            'callable',
+            'format',
+            'len',
+            'chr',
+            'range',
+            'vars',
+            'getattr',
+            'locals',
+            'repr',
+            'zip',
+            'compile',
+            'globals',
+            'map',
+            'reversed',
+            '__import__',
+            'hasattr',
+            'max',
+            'round',
+        }
+        #rest of built in functions
+        self.lightgreen_words = {
+            'complex',
+            'classmethod',
+            'frozenset',
+            'list',
+            'property',
+            'type',
+            'tuple',
+            'super',
+            'bytes',
+            'float',
+            'bytearray',
+            'str',
+            'int',
+            'staticmethod',
+            'bool',
+            'object',
+            'set',
+            'dict',
+            'slice',
+        }
+        self.lightblue_words = {
+            'targes',
+            'args',
         }
         self.output = ''
         self.color_file()
+
+    def output_word(self, word):
+        if word in self.blue_words:
+            self.output += self.add_color(word, 'blue', 0, len(word))
+        elif word in self.purple_words:
+            self.output += self.add_color(word, 'purple', 0, len(word))
+        elif word in self.yellow_words:
+            self.output += self.add_color(word, 'yellow', 0 , len(word))
+        elif word in self.lightgreen_words:
+            self.output += self.add_color(word, 'lightgreen', 0 , len(word))
+        elif word in self.lightblue_words:
+            self.output += self.add_color(word, 'lightblue', 0 , len(word))
+        elif word.isnumeric():
+            self.output += self.add_color(word, 'number', 0, len(word))
+        else:
+            self.output += escape(word)
+
         
     def color_file(self):
         #if there is a string to ignore the coloring inside it
@@ -55,12 +157,14 @@ class PythonCode(object):
                         str_type = char
                         apostrophe_len = 1
                         string_ignore = True
-                        if word:
-                            self.output += escape(word)
+                        if word == 'u':
+                            self.output += self.add_color(word, "blue", 0, 1)
+                        elif word:
+                            output_word(word)
                             word = ''
                     elif char == '#':
                         if word:
-                            self.output += escape(word)
+                            self.output_word(word)
                             word = ''
                         self.output += self.add_color(line, 'green', pos, len(line) - 1)
                         self.output += '\n'
@@ -73,70 +177,68 @@ class PythonCode(object):
                             equals = False
                             if '->' not in word:
                                 self.output += self.add_color(line, 'lightblue', pos - len(word), pos)
-                                self.output += escape(char)
+                                self.output += char
                                 word = ''
                             else:
                                 start = word.index('->') + 2
                                 self.output +=  escape(word[:start]) + self.add_color(word, 'lightgreen',  start, len(word))
-                                self.output += escape(char)
+                                self.output += char
                                 word = ''
                         else:
-                            self.output += word + char
+                            self.output_word(word)
+                            word = ''
+                            self.output += char
                     elif char == ',' or char == ')':
                         if char == ')':
                             parens -= 1
                             if parens + more_parens == 0:
                                 more_args = False
-                        if word.isnumeric():
-                            self.output += self.add_color(word, 'number', 0, len(word))
-                        else:
-                            self.output += escape(word)
-                        self.output += escape(char)
+                        self.output_word(word)
+                        self.output += char
                         word = ''
                     elif char == '(':
                         parens += 1
-                        if word.startswith('print') or word.startswith('len') or word.startswith('open'):
-                            self.output += self.add_color(word, 'yellow', 0 , len(word))
-                        else:
-                            more_args = True
-                            more_parens += 1
-                            self.output += escape(word)
-                        self.output += escape(char)
+                        more_args = True
+                        self.output_word(word)
+                        self.output += char
+                        word = ''
+                    elif char == '[':
+                        self.output_word(word)
+                        self.output += char
+                        word = ''
+                    elif char == ']':
+                        self.output_word(word)
+                        self.output += char
                         word = ''
                     elif char == '=' and more_args:
                         self.output += self.add_color(word, 'lightblue', 0, len(word))
+                        self.output += char
+                        word = ''
+                    elif char == '.':
+                        if word == 'self':
+                            self.output += self.add_color(word, 'blue', 0, 4) + char
+                            word = ''
+                        else:
+                            word += char
+                    elif char == ':':
+                        self.output_word(word)
                         self.output += char
                         word = ''
                     elif char != ' ' and char != '\n':
                         word += char
                     else:
                         if word == 'def':
-                            word = ''
                             self.output += self.add_color(line, 'blue', pos - 3, pos)
                             def_ignore = True
                         elif word == 'class':
-                            word = ''
                             self.output += self.add_color(line, 'blue', pos - 5, pos)
                             class_ignore = True
-                        elif word.startswith('self'):
-                            self.output += self.add_color(word, 'blue', 0, 4) + word[4:]
-                            word = ''
                         elif word == '->' and equals:
                             word += char
                             continue
-                        elif word in self.blue_words:
-                            self.output += self.add_color(word, 'blue', 0, len(word))
-                            word = ''
-                        elif word in self.purple_words:
-                            self.output += self.add_color(word, 'purple', 0, len(word))
-                            word = ''
-                        elif word:
-                            if word.isnumeric():
-                                self.output += self.add_color(word, 'number', 0, len(word))
-                            else:
-                                self.output += escape(word)
-                            word = ''
-                        
+                        else:
+                            self.output_word(word)
+                        word = ''
                         self.output += char
                 #if we are looking for the end of a string
                 elif string_ignore:
@@ -248,29 +350,10 @@ class PythonCode(object):
                     else:
                         word += char
                 elif class_ignore:
-                    if char == '(' and not args:
+                    if char == ':':
                         self.output += self.add_color(line, 'lightgreen', pos - len(word), pos)
                         self.output += escape(char)
                         word = ''
-                        parens = 1
-                        args = True
-                    elif char == '(':
-                        parens += 1
-                    elif char == ')':
-                        parens -= 1
-                        if parens == 0:
-                            self.output += self.add_color(line, 'lightgreen', pos - len(word), pos - 1)
-                            self.output += ')'
-                            word = ''
-                    elif char == ':':
-                        if '->' not in word:
-                            self.output += escape(word) + escape(char)
-                            word = ''
-                        else:
-                            start = word.index('->') + 2
-                            self.output += escape(word[:start]) + self.add_color(word, 'lightgreen',  start, len(word))
-                            self.output += escape(char)
-                            word = ''
                         class_ignore = False
                     else:
                         word += char
@@ -306,6 +389,6 @@ def escape(s):
 
 
 if __name__ == "__main__":
-    python = PythonCode(open('base.py', 'r'))
+    python = PythonCode(open('../MVT/simple.py', 'r'))
     template = open('index.html').read()
     open('temp.html', 'w').write(template.replace('PUTCODEHERE', python.output))
